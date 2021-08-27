@@ -1,12 +1,18 @@
+# generated
 tf_inventory.yml
 tf_variables.yml
+ssh_key
+ssh_key.pub
 
+# terraform
 .terraform
 .terraform.lock.hcl
 terraform.tfstate
 terraform.tfstate.backup
 
+# vagrant
 .vagrant
 
+# miscellaneous
 .vscode
 .DS_Store
