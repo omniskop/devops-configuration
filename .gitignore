@@ -9,3 +9,4 @@ terraform.tfstate.backup
 .vagrant
 
 .vscode
+.DS_Store
