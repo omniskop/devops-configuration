@@ -1,0 +1,45 @@
+- hosts: app_client
+  tasks:
+  - name: "include variables"
+    include_vars:
+      file: ../tf_variables.yml
+  - name: "clone repository"
+    include: clone.yml
+  - name: "install NodeJS"
+    include: nodejs.yml
+
+  - name: "apt-get update"
+    apt:
+      update_cache: yes
+      cache_valid_time: 3600
+    become: yes
+  - name: "install nginx"
+    apt:
+      name: ['nginx']
+      state: latest
+    become: yes
+
+  - name: "install dependencies"
+    community.general.npm:
+      ci: true
+      production: true
+      path: "/home/{{ ansible_user_id }}/deployment/app/client"
+  - name: "build"
+    command:
+      chdir: "/home/{{ ansible_user_id }}/deployment/app/client"
+      cmd: "npm run build"
+    environment:
+      PUBLIC_URL: "https://{{ public_url }}"
+      API_URL: "https://{{ api_url }}"
+      BUILD_PATH: "/home/{{ ansible_user_id }}/public"
+
+  - name: "configure default site"
+    template:
+      src: site.nginx.conf
+      dest: /etc/nginx/sites-available/default
+    become: yes
+  - name: "start nginx"
+    service:
+      name: nginx
+      state: restarted
+    become: yes

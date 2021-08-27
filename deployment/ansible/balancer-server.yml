@@ -1,0 +1,76 @@
+- hosts: balancer_server
+  vars:
+    certificate_access_token: "{{ lookup('env', 'CERTIFICATE_ACCESS_TOKEN') }}"
+    dns_control_key: "{{ lookup('env', 'DNS_CONTROL_KEY') }}"
+  become: yes
+  tasks:
+  - name: "include variables"
+    include_vars:
+      file: ../tf_variables.yml
+  - name: "apt-get update"
+    apt:
+      update_cache: yes
+      cache_valid_time: 3600
+  - name: "install nginx"
+    apt:
+      name: ['nginx']
+      state: latest
+
+  - name: "download fullchain"
+    uri:
+      url: "https://omniskop.de/node-red/devops/cert/fullchain.pem"
+      method: POST
+      body: "{{ certificate_access_token }}"
+      dest: "/etc/nginx/fullchain.pem"
+      creates: "/etc/nginx/fullchain.pem" # don't run if this file exists
+      mode: 0600
+      follow_redirects: all
+      headers: {"Content-Type": "text/plain"}
+  - name: "download fullchain"
+    uri:
+      url: "https://omniskop.de/node-red/devops/cert/privkey.pem"
+      method: POST
+      body: "{{ certificate_access_token }}"
+      dest: "/etc/nginx/privkey.pem"
+      creates: "/etc/nginx/privkey.pem" # don't run if this file exists
+      mode: 0600
+      follow_redirects: all
+      headers: {"Content-Type": "text/plain"}
+  - name: "download dhparam"
+    get_url:
+      url: "https://ssl-config.mozilla.org/ffdhe2048.txt"
+      dest: "/etc/nginx/dhparam"
+      
+  - name: "copy server balancer config"
+    template:
+      src: balancer-server.nginx.conf
+      dest: /etc/nginx/sites-available/balancer-server.conf
+  - name: "enable config"
+    file:
+      src: "/etc/nginx/sites-available/balancer-server.conf"
+      dest: "/etc/nginx/sites-enabled/balancer-server.conf"
+      state: link
+  - name: "copy ssl config"
+    template:
+      src: ssl.nginx.conf
+      dest: /etc/nginx/ssl.conf
+  - name: "disable default config"
+    file:
+      path: /etc/nginx/sites-enabled/default
+      state: absent
+  - name: "start nginx"
+    service:
+      name: nginx
+      state: started
+  - name: "reload nginx config"
+    command:
+      cmd: "nginx -s reload"
+  - name: "update dns entry"
+    uri:
+      url: "https://omniskop.de/node-red/devops/dns"
+      method: POST
+      body: {key: "{{ dns_control_key }}", ip: "{{ balancer_server_ip_address }}"}
+      body_format: json
+      follow_redirects: all
+      headers: {"Content-Type": "application/json"}
+      

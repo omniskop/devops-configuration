@@ -1,0 +1,14 @@
+version: "3"
+
+env:
+  ANSIBLE_CONFIG: ansible-vagrant.cfg
+
+tasks:
+  vagrant:up: vagrant up
+  vagrant:down: vagrant destroy --force
+  vagrant:ssh: vagrant ssh
+
+  ansible:server: ansible-playbook -i inventory.yml ../app-server.yml
+  ansible:database: ansible-playbook -i inventory.yml ../app-database.yml
+  ansible:client: ansible-playbook -i inventory.yml ../app-client.yml
+  ansible:balancer:server: ansible-playbook -i inventory.yml ../app-server-balancer.yml

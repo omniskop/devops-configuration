@@ -1,0 +1,38 @@
+- hosts: app_server
+  vars:
+    jwt_secret: "{{ lookup('env', 'JWT_SECRET') }}"
+  tasks:
+  - name: "include variables"
+    include_vars:
+      file: ../tf_variables.yml
+  - name: "clone repository"
+    include: clone.yml
+  - name: "install NodeJS"
+    include: nodejs.yml
+  - name: "install pm2"
+    command:
+      cmd: "npm install -g pm2"
+      creates: /usr/bin/pm2
+    become: yes
+  - name: "autostart pm2"
+    command:
+      cmd: "pm2 startup systemd -u {{ ansible_user_id }} --hp /home/{{ ansible_user_id }}"
+      creates: /etc/systemd/system/pm2*.service
+    become: yes
+
+  - name: "copy pm2 ecosystem"
+    template:
+      src: server-ecosystem.js
+      dest: /home/{{ ansible_user_id }}/ecosystem.config.js
+
+  - name: "install dependencies"
+    community.general.npm:
+      ci: true
+      production: true
+      path: "/home/{{ ansible_user_id }}/deployment/app/server"
+  - name: "run"
+    command:
+      chdir: "/home/{{ ansible_user_id }}"
+      cmd: "/usr/bin/pm2 start ecosystem.config.js"
+  - name: "save pm2"
+    command: "pm2 save"

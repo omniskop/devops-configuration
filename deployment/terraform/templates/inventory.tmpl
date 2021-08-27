@@ -1,0 +1,27 @@
+app_server:
+  hosts:
+    ${app_server_ip_address}:
+      ansible_host: ${app_server_ip_address}
+      ansible_user: ${username}
+      ansible_ssh_private_key_file: ssh_key
+
+app_database:
+  hosts:
+    ${app_database_ip_address}:
+      ansible_host: ${app_database_ip_address}
+      ansible_user: ${username}
+      ansible_ssh_private_key_file: ssh_key
+
+app_client:
+  hosts:
+    ${app_client_ip_address}:
+      ansible_host: ${app_client_ip_address}
+      ansible_user: ${username}
+      ansible_ssh_private_key_file: ssh_key
+
+balancer_server:
+  hosts:
+    ${balancer_server_ip_address}:
+      ansible_host: ${balancer_server_ip_address}
+      ansible_user: ${username}
+      ansible_ssh_private_key_file: ssh_key

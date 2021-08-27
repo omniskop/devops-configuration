@@ -1,0 +1,107 @@
+version: "3"
+
+includes:
+  local:
+    taskfile: ansible/vagrant/VagrantTasks.yml
+    dir: ansible/vagrant/
+
+tasks:
+  aws:status:
+    - aws sts get-caller-identity
+
+  create-keys:
+    status:
+      - test -f ssh_key
+      - test -f ssh_key.pub
+    cmds:
+      - ssh-keygen -t ed25519 -f ./ssh_key -P "" -C "terraform-deployment"
+
+  # ====== TERRAFORM ======
+  terraform:setup:
+    desc: "Initialize terraform"
+    cmds:
+      - terraform -chdir=terraform init -var-file="production.tfvars"
+
+  terraform:plan:
+    desc: "Plan terraform setup"
+    cmds:
+      - touch plan_key_delete_this
+      - terraform -chdir=terraform plan -var-file="../production.tfvars" -var="public_key=../plan_key_delete_this"
+      - rm plan_key_delete_this
+
+  terraform:up:
+    desc: "Setup infrastructure"
+    deps: [create-keys]
+    cmds:
+      - terraform -chdir=terraform apply -auto-approve -var-file="../production.tfvars" -var="public_key=../ssh_key.pub"
+      - terraform -chdir=terraform output
+
+  terraform:down:
+    desc: "Destroy all infrastructure"
+    cmds:
+      - cmd: terraform -chdir=terraform destroy -auto-approve -var-file="../production.tfvars" -var="public_key=../ssh_key.pub"
+        ignore_errors: true
+      - rm ssh_key ssh_key.pub
+
+  terraform:output:
+    desc: "Print terraform output"
+    cmds:
+      - terraform -chdir=terraform output
+
+  ssh:server:
+    desc: "SSH login to app server"
+    cmds:
+      # the '-o StrictHostKeychecking=no' option automatically accepts new host keys
+      - cmd: ssh -i ssh_key -o StrictHostKeychecking=no "$(terraform -chdir=terraform output -raw username)@$(terraform -chdir=terraform output -raw server-ip)"
+        ignore_error: true
+      - ssh-keygen -R "$(terraform -chdir=terraform output -raw server-ip)" # remove ip from known_hosts
+
+  ssh:database:
+    desc: "SSH login to app database"
+    cmds:
+      - cmd: ssh -i ssh_key -o StrictHostKeychecking=no "$(terraform -chdir=terraform output -raw username)@$(terraform -chdir=terraform output -raw database-ip)"
+        ignore_error: true
+      - ssh-keygen -R "$(terraform -chdir=terraform output -raw database-ip)" # remove ip from known_hosts
+
+  ssh:client:
+    desc: "SSH login to app client"
+    cmds:
+      - cmd: ssh -i ssh_key -o StrictHostKeychecking=no "$(terraform -chdir=terraform output -raw username)@$(terraform -chdir=terraform output -raw client-ip)"
+        ignore_error: true
+      - ssh-keygen -R "$(terraform -chdir=terraform output -raw client-ip)" # remove ip from known_hosts
+
+  ssh:balancer:server:
+    desc: "SSH login to balancer server"
+    cmds:
+      - cmd: ssh -i ssh_key -o StrictHostKeychecking=no "$(terraform -chdir=terraform output -raw username)@$(terraform -chdir=terraform output -raw balancer-server-ip)"
+        ignore_error: true
+      - ssh-keygen -R "$(terraform -chdir=terraform output -raw balancer-server-ip)" # remove ip from known_hosts
+
+  # ====== ANSIBLE ======
+  ansible:database:
+    desc: "Run ansible playbook to setup the database server"
+    cmds:
+      - ansible-playbook -i tf_inventory.yml ansible/app-database.yml
+
+  ansible:server:
+    desc: "Run ansible playbook to setup the app servers"
+    cmds:
+      - ansible-playbook -i tf_inventory.yml ansible/app-server.yml
+
+  ansible:client:
+    desc: "Run ansible playbook to setup the app client"
+    cmds:
+      - ansible-playbook -i tf_inventory.yml ansible/app-client.yml
+
+  ansible:balancer:server:
+    desc: "Run ansible playbook to setup the balancer server"
+    cmds:
+      - ansible-playbook -i tf_inventory.yml ansible/balancer-server.yml
+
+  ansible: # calling tasks instead of dependencies as dependencies are run in parallel
+    desc: "Run all ansible playbooks required to setup the app infrastructure"
+    cmds:
+      - task: ansible:database
+      - task: ansible:server
+      - task: ansible:client
+      - task: ansible:balancer:server

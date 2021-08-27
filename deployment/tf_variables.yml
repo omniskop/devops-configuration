@@ -1,0 +1,13 @@
+nodejs_version: 14
+public_url: todo.omniskop.de
+api_url: todo.omniskop.de
+
+app_database_vpc_ip_address: 10.0.44.36
+app_database_ip_address: 3.226.254.31
+app_database_port: 27017
+app_server_ip_address: 3.234.241.233
+app_server_port: 3000
+app_client_ip_address: 3.238.98.212
+app_client_vpc_ip_address: 10.0.44.0
+app_client_port: 3001
+balancer_server_ip_address: 3.236.68.28

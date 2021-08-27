@@ -1,0 +1,14 @@
+[Unit]
+Description=MongoDB Database Service
+Wants=network.target
+After=network.target
+
+[Service]
+Type=simple
+PermissionsStartOnly=true
+WorkingDirectory=/opt/mongo
+ExecStart=/usr/bin/mongod --config /opt/mongo/prod.mongod.conf
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

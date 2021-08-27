@@ -1,0 +1,23 @@
+- name: "update apt"
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  become: yes
+- name: "install git"
+  apt:
+    name: ['git']
+    state: latest
+  become: yes
+- name: "copy deploy key"
+  copy:
+    dest: /home/{{ ansible_user_id }}/deploy_key
+    content: "{{ lookup('env', 'APP_DEPLOY_KEY') }}\n"
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+    mode: '0600'
+- name: "clone"
+  git:
+    repo: "git@github.com:omniskop/lecture-devops-app.git"
+    dest: /home/{{ ansible_user_id }}/deployment
+    key_file: "/home/{{ ansible_user_id }}/deploy_key"
+    accept_hostkey: yes # required

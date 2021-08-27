@@ -1,0 +1,22 @@
+app_server:
+  hosts:
+    10.0.42.23
+  vars:
+    database_ip_address: 10.0.42.23
+    client_ip_address: 10.0.42.23
+
+app_database:
+  hosts:
+    10.0.42.23
+
+app_client:
+  hosts:
+    10.0.42.23
+  vars:
+    server_ip_address: 10.0.42.23
+
+app_server_balancer:
+  hosts:
+    10.0.42.23
+  vars:
+    server_ip_address: 10.0.42.23

@@ -1,0 +1,49 @@
+- hosts: app_database
+  become: yes
+  tasks:
+  - name: "include variables"
+    include_vars:
+      file: ../tf_variables.yml
+  - name: "create working directory"
+    file:
+      path: /opt/mongo
+      state: directory
+  - name: "download mongodb"
+    get_url:
+      url: "https://repo.mongodb.org/apt/ubuntu/dists/{{ ansible_facts.distribution_release }}/mongodb-org/5.0/multiverse/binary-amd64/mongodb-org-server_5.0.2_amd64.deb"
+      dest: "/opt/mongo/mongodb.deb"
+    # notify: restart mongodb
+  - name: "install mongodb"
+    apt:
+      deb: "/opt/mongo/mongodb.deb"
+
+  - name: "copy mongodb configuration"
+    template:
+      src: prod.mongod.conf
+      dest: /opt/mongo/prod.mongod.conf
+      mode: '0644'
+    # notify: restart mongodb
+  - name: "create log folder"
+    file:
+      path: /opt/mongo/logs
+      state: directory
+  - name: "create db folder"
+    file:
+      path: /opt/mongo/db
+      state: directory
+  - name: "install systemd service"
+    template:
+      src: mongod.service
+      dest: /etc/systemd/system/mongod.service
+  - name: "start systemd service"
+    service:
+      name: mongod
+      daemon_reload: yes
+      enabled: true
+      state: started
+
+  # handlers:
+  #   - name: restart mongodb
+  #     service:
+  #       name: mongod
+  #       state: restarted
