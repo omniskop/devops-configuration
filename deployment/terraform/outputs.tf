@@ -1,9 +1,4 @@
 
-output "server-ip" {
-  description = "Server IP Address"
-  value       = aws_instance.app_server.public_ip
-}
-
 output "database-ip" {
   description = "Database IP Address"
   value       = aws_instance.app_database.public_ip
@@ -14,9 +9,24 @@ output "database-vpc-ip" {
   value       = aws_instance.app_database.private_ip
 }
 
+output "server-ip" {
+  description = "Server IP Addresses"
+  value       = aws_instance.app_server[0].public_ip
+}
+
+output "server-ips" {
+  description = "Server IP Addresses"
+  value       = aws_instance.app_server.*.public_ip
+}
+
 output "client-ip" {
-  description = "Client IP Address"
-  value       = aws_instance.app_client.public_ip
+  description = "Client IP Addresses"
+  value       = aws_instance.app_client[0].public_ip
+}
+
+output "client-ips" {
+  description = "Client IP Addresses"
+  value       = aws_instance.app_client.*.public_ip
 }
 
 output "balancer-server-ip" {

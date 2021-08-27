@@ -34,7 +34,6 @@ tasks:
     deps: [create-keys]
     cmds:
       - terraform -chdir=terraform apply -auto-approve -var-file="../production.tfvars" -var="public_key=../ssh_key.pub"
-      - terraform -chdir=terraform output
 
   terraform:down:
     desc: "Destroy all infrastructure"
@@ -49,7 +48,7 @@ tasks:
       - terraform -chdir=terraform output
 
   ssh:server:
-    desc: "SSH login to app server"
+    desc: "SSH login to an app server"
     cmds:
       # the '-o StrictHostKeychecking=no' option automatically accepts new host keys
       - cmd: ssh -i ssh_key -o StrictHostKeychecking=no "$(terraform -chdir=terraform output -raw username)@$(terraform -chdir=terraform output -raw server-ip)"
@@ -64,7 +63,7 @@ tasks:
       - ssh-keygen -R "$(terraform -chdir=terraform output -raw database-ip)" # remove ip from known_hosts
 
   ssh:client:
-    desc: "SSH login to app client"
+    desc: "SSH login to a client server"
     cmds:
       - cmd: ssh -i ssh_key -o StrictHostKeychecking=no "$(terraform -chdir=terraform output -raw username)@$(terraform -chdir=terraform output -raw client-ip)"
         ignore_error: true

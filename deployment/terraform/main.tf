@@ -26,8 +26,8 @@ resource "local_file" "ansible_inventory" {
   content = templatefile("templates/inventory.tmpl", {
     "username": var.username,
     "app_database_ip_address" : aws_instance.app_database.public_ip
-    "app_server_ip_address" : aws_instance.app_server.public_ip
-    "app_client_ip_address" : aws_instance.app_client.public_ip
+    "app_server_ip_addresses" : aws_instance.app_server.*.public_ip
+    "app_client_ip_addresses" : aws_instance.app_client.*.public_ip
     "balancer_server_ip_address": aws_instance.balancer_server.public_ip
   })
 }
@@ -45,11 +45,12 @@ resource "local_file" "ansible_variables" {
     "app_database_vpc_ip_address": aws_instance.app_database.private_ip
     "app_database_port": var.database_port
 
-    "app_server_ip_address": aws_instance.app_server.public_ip
+    "app_server_ip_addresses": aws_instance.app_server.*.public_ip
+    "app_server_vpc_ip_addresses": aws_instance.app_server.*.private_ip
     "app_server_port": var.server_port
 
-    "app_client_ip_address": aws_instance.app_client.public_ip
-    "app_client_vpc_ip_address": aws_instance.app_client.private_ip
+    "app_client_ip_addresses": aws_instance.app_client.*.public_ip
+    "app_client_vpc_ip_addresses": aws_instance.app_client.*.private_ip
     "app_client_port": var.client_port
 
     "balancer_server_ip_address": aws_instance.balancer_server.public_ip

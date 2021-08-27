@@ -1,5 +1,5 @@
 
-resource "aws_security_group" "public-inbound" {
+resource "aws_security_group" "default-public-inbound" {
   tags = { Name = "Public Inbound" }
 
   vpc_id = aws_vpc.main_vpc.id
@@ -39,27 +39,27 @@ resource "aws_security_group" "http-inbound" {
   }
 }
 
-resource "aws_security_group" "public-server-inbound" {
+resource "aws_security_group" "vpc-server-inbound" {
   tags = { Name = "Public Server Inbound" }
 
   vpc_id = aws_vpc.main_vpc.id
 
   ingress {
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["10.0.0.0/16"]
     from_port   = var.server_port
     to_port     = var.server_port
   }
 }
 
-resource "aws_security_group" "vpc-inbound" {
+resource "aws_security_group" "default-vpc-inbound" {
   tags = { Name = "VPC Inbound" }
 
   vpc_id = aws_vpc.main_vpc.id
 
   ingress { # allow all ipv4 icmp from inside
     protocol    = "icmp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["10.0.0.0/16"]
     from_port   = -1
     to_port     = -1
   }

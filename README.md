@@ -46,10 +46,11 @@ Terraform can pass variables to ansible through the generated inventory and vari
 |                          |                | app_database_vpc_ip_address  |
 |                          |                | app_database_ip_address      |
 |                          |                | app_database_port            |
-|                          |                | app_server_ip_address        |
+|                          |                | app_server_ip_addresses      |
+|                          |                | app_server_vpc_ip_addresses  |
 |                          |                | app_server_port              |
-|                          |                | app_client_ip_address        |
-|                          |                | app_client_vpc_ip_address    |
+|                          |                | app_client_ip_addresses      |
+|                          |                | app_client_vpc_ip_addresses  |
 |                          |                | app_client_port              |
 |                          |                | balancer_server_ip_address   |
 |                          |                | ansible_host                 |

@@ -6,7 +6,7 @@ module.exports = {
             env: {
                 "NODE_ENV": "production",
                 "PORT": "{{ app_server_port }}",
-                "CLIENT_URL": "https://{{ app_client_ip_address }}:80",
+                "CLIENT_URL": "http://{{ balancer_server_ip_address }}:80",
                 "MONGODB_URL": "mongodb://{{ app_database_vpc_ip_address }}:27017/todo-app",
                 "JWT_SECRET": "{{ jwt_secret }}"
             }

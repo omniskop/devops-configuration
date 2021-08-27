@@ -28,6 +28,14 @@ variable "server_port" {
   type = number
 }
 
+variable "server_count" {
+  type = number
+}
+
 variable "client_port" {
+  type = number
+}
+
+variable "client_count" {
   type = number
 }
