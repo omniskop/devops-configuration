@@ -6,10 +6,9 @@ ssh_key.pub
 
 # terraform
 .terraform
-.terraform.lock.hcl
-.terraform.tfstate.lock.info
+.terraform.*
 terraform.tfstate
-terraform.tfstate.backup
+terraform.tfstate.*
 
 # vagrant
 .vagrant
