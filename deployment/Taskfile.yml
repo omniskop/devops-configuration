@@ -16,6 +16,19 @@ tasks:
     cmds:
       - ssh-keygen -t ed25519 -f ./ssh_key -P "" -C "terraform-deployment"
 
+  all:
+    desc: "Create new instrastructure and provision it"
+    cmds:
+      - task: terraform:up
+      - task: ansible
+  
+  upgrade:
+    desc: "Perform upgrade of server and client without interruption"
+    cmds:
+      - task: terraform:upgrade # creates new instances while preserving the old ones
+      - task: ansible # provisions these instances and updates load balancer
+      - task: terraform:up # destroys old instances
+
   # ====== TERRAFORM ======
   terraform:setup:
     desc: "Initialize terraform"
@@ -34,6 +47,13 @@ tasks:
     deps: [create-keys]
     cmds:
       - terraform -chdir=terraform apply -auto-approve -var-file="../production.tfvars" -var="public_key=../ssh_key.pub"
+
+  terraform:upgrade:
+    desc: "Creates new server and client hosts while preserving the old ones"
+    deps: [create-keys]
+    cmds:
+      - terraform -chdir=terraform state mv aws_instance.app_server aws_instance.app_server_outdated
+      - terraform -chdir=terraform apply -auto-approve -var-file="../production.tfvars" -var="public_key=../ssh_key.pub" -var="upgrade_infrastructure=true"
 
   terraform:down:
     desc: "Destroy all infrastructure"

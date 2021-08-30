@@ -39,3 +39,8 @@ variable "client_port" {
 variable "client_count" {
   type = number
 }
+
+variable "upgrade_infrastructure" {
+  type = bool
+  default = false
+}

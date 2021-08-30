@@ -35,11 +35,48 @@ resource "aws_instance" "app_server" {
   ]
 }
 
+# Outdated version of the app backend
+resource "aws_instance" "app_server_outdated" {
+  tags = { Name = "App Server Outdated" }
+
+  count = var.upgrade_infrastructure ? var.server_count : 0
+  # ami           = "ami-0c2b8ca1dad447f8a" # Amazon Linux (yum package manager)
+  ami           = "ami-09e67e426f25ce0d7" # Ubuntu Focal
+  instance_type = "t2.micro"
+  key_name      = aws_key_pair.aws_key.key_name
+  subnet_id     = aws_subnet.main_subnet.id
+
+  vpc_security_group_ids = [
+    aws_security_group.default-public-inbound.id,
+    aws_security_group.vpc-server-inbound.id,
+    aws_security_group.default-vpc-inbound.id,
+    aws_security_group.allow-all-outbound.id
+  ]
+}
+
 # Client hosting
 resource "aws_instance" "app_client" {
   tags = { Name = "App Client" }
 
   count         = var.client_count
+  ami           = "ami-09e67e426f25ce0d7" # Ubuntu Focal
+  instance_type = "t2.micro"
+  key_name      = aws_key_pair.aws_key.key_name
+  subnet_id     = aws_subnet.main_subnet.id
+
+  vpc_security_group_ids = [
+    aws_security_group.default-public-inbound.id,
+    aws_security_group.default-vpc-inbound.id,
+    aws_security_group.vpc-client-inbound.id,
+    aws_security_group.allow-all-outbound.id
+  ]
+}
+
+# Outdated version of web client
+resource "aws_instance" "app_client_outdated" {
+  tags = { Name = "App Client Outdated" }
+
+  count         = var.upgrade_infrastructure ? var.client_count : 0
   ami           = "ami-09e67e426f25ce0d7" # Ubuntu Focal
   instance_type = "t2.micro"
   key_name      = aws_key_pair.aws_key.key_name
