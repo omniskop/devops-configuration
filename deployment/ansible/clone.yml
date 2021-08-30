@@ -21,3 +21,5 @@
     dest: /home/{{ ansible_user_id }}/deployment
     key_file: "/home/{{ ansible_user_id }}/deploy_key"
     accept_hostkey: yes # required
+    single_branch: yes
+    version: "{{ branch_name }}"

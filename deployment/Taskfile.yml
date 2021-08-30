@@ -5,6 +5,11 @@ includes:
     taskfile: ansible/vagrant/VagrantTasks.yml
     dir: ansible/vagrant/
 
+env:
+  TF_HTTP_ADDRESS: https://omniskop.de/node-red/devops/terraform/state/production
+  TF_HTTP_LOCK_ADDRESS: https://omniskop.de/node-red/devops/terraform/state/production/lock
+  TF_HTTP_UNLOCK_ADDRESS: https://omniskop.de/node-red/devops/terraform/state/production/unlock
+
 tasks:
   aws:status:
     - aws sts get-caller-identity
@@ -33,7 +38,7 @@ tasks:
   terraform:init:
     desc: "Initialize terraform"
     cmds:
-      - terraform -chdir=terraform init -var-file="production.tfvars"
+      - terraform -chdir=terraform init -reconfigure -var-file="production.tfvars"
 
   terraform:plan:
     desc: "Plan terraform setup"

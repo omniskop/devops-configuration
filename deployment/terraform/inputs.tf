@@ -12,6 +12,11 @@ variable "nodejs_version" {
   type = string
 }
 
+variable "branch_name" {
+  type = string
+  default = "production"
+}
+
 variable "public_url" {
   type = string
 }

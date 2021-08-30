@@ -1,9 +1,8 @@
-public_url = "todo.omniskop.de"
-api_url = "todo.omniskop.de"
+public_url = "staging.todo.omniskop.de"
+api_url = "staging.todo.omniskop.de"
 
 nodejs_version = "14"
-branch_name = "production"
-state_env = "production"
+branch_name = "main"
 
 database_port = 27017
 server_port = 3000
