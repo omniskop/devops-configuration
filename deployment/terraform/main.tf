@@ -7,6 +7,16 @@ terraform {
       version = "~> 3.27"
     }
   }
+
+  backend "http" {
+    address = "https://omniskop.de/node-red/devops/terraform/state"
+    lock_address = "https://omniskop.de/node-red/devops/terraform/state/lock"
+    unlock_address = "https://omniskop.de/node-red/devops/terraform/state/unlock"
+    lock_method = "POST"
+    unlock_method = "POST"
+    username = "terraform"
+    # password set in environment variable TF_HTTP_PASSWORD
+  }
 }
 
 provider "aws" {

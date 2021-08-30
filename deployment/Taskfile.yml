@@ -30,7 +30,7 @@ tasks:
       - task: terraform:up # destroys old instances
 
   # ====== TERRAFORM ======
-  terraform:setup:
+  terraform:init:
     desc: "Initialize terraform"
     cmds:
       - terraform -chdir=terraform init -var-file="production.tfvars"

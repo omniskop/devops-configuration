@@ -36,6 +36,7 @@ Terraform can pass variables to ansible through the generated inventory and vari
 |               JWT_SECRET |       +        | +                            |
 |           APP_DEPLOY_KEY |       +        | +                            |
 |          DNS_CONTROL_KEY |       +        | +                            |
+|         TF_HTTP_PASSWORD |       +        | +                            |
 |                          |   public_key   | ansible_ssh_private_key_file |
 |                          |   public_url   | public_url                   |
 |                          |    api_url     | api_url                      |
