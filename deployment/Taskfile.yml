@@ -6,9 +6,9 @@ includes:
     dir: ansible/vagrant/
 
 env:
-  TF_HTTP_ADDRESS: https://omniskop.de/node-red/devops/terraform/state/production
-  TF_HTTP_LOCK_ADDRESS: https://omniskop.de/node-red/devops/terraform/state/production/lock
-  TF_HTTP_UNLOCK_ADDRESS: https://omniskop.de/node-red/devops/terraform/state/production/unlock
+  TF_HTTP_ADDRESS: https://omniskop.de/node-red/devops/terraform/state/staging
+  TF_HTTP_LOCK_ADDRESS: https://omniskop.de/node-red/devops/terraform/state/staging/lock
+  TF_HTTP_UNLOCK_ADDRESS: https://omniskop.de/node-red/devops/terraform/state/staging/unlock
 
 tasks:
   aws:status:
