@@ -12,9 +12,9 @@ variable "nodejs_version" {
   type = string
 }
 
-variable "branch_name" {
+variable "environment" {
   type = string
-  default = "production"
+  default = "staging"
 }
 
 variable "public_url" {

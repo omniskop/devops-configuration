@@ -22,4 +22,4 @@
     key_file: "/home/{{ ansible_user_id }}/deploy_key"
     accept_hostkey: yes # required
     single_branch: yes
-    version: "{{ branch_name }}"
+    version: "{{ 'production' if deploy_env == 'production' else 'main' }}"

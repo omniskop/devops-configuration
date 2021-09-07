@@ -5,10 +5,13 @@ includes:
     taskfile: ansible/vagrant/VagrantTasks.yml
     dir: ansible/vagrant/
 
+vars:
+  ENVIRONMENT: "{{if .env}}{{.env}}{{else}}staging{{end}}" # default environment is staging but at can be overridden through the "env" environment variable
+
 env:
-  TF_HTTP_ADDRESS: https://omniskop.de/node-red/devops/terraform/state/staging
-  TF_HTTP_LOCK_ADDRESS: https://omniskop.de/node-red/devops/terraform/state/staging/lock
-  TF_HTTP_UNLOCK_ADDRESS: https://omniskop.de/node-red/devops/terraform/state/staging/unlock
+  TF_HTTP_ADDRESS: https://omniskop.de/node-red/devops/terraform/state/{{.ENVIRONMENT}}
+  TF_HTTP_LOCK_ADDRESS: https://omniskop.de/node-red/devops/terraform/state/{{.ENVIRONMENT}}/lock
+  TF_HTTP_UNLOCK_ADDRESS: https://omniskop.de/node-red/devops/terraform/state/{{.ENVIRONMENT}}/unlock
 
 tasks:
   aws:status:
@@ -38,32 +41,32 @@ tasks:
   terraform:init:
     desc: "Initialize terraform"
     cmds:
-      - terraform -chdir=terraform init -reconfigure -var-file="production.tfvars"
+      - terraform -chdir=terraform init -reconfigure -var-file="{{.ENVIRONMENT}}.tfvars"
 
   terraform:plan:
     desc: "Plan terraform setup"
     cmds:
       - touch plan_key_delete_this
-      - terraform -chdir=terraform plan -var-file="../production.tfvars" -var="public_key=../plan_key_delete_this"
+      - terraform -chdir=terraform plan -var-file="../{{.ENVIRONMENT}}.tfvars" -var="public_key=../plan_key_delete_this"
       - rm plan_key_delete_this
 
   terraform:up:
     desc: "Setup infrastructure"
     deps: [create-keys]
     cmds:
-      - terraform -chdir=terraform apply -auto-approve -var-file="../production.tfvars" -var="public_key=../ssh_key.pub"
+      - terraform -chdir=terraform apply -auto-approve -var-file="../{{.ENVIRONMENT}}.tfvars" -var="public_key=../ssh_key.pub"
 
   terraform:upgrade:
     desc: "Creates new server and client hosts while preserving the old ones"
     deps: [create-keys]
     cmds:
       - terraform -chdir=terraform state mv aws_instance.app_server aws_instance.app_server_outdated
-      - terraform -chdir=terraform apply -auto-approve -var-file="../production.tfvars" -var="public_key=../ssh_key.pub" -var="upgrade_infrastructure=true"
+      - terraform -chdir=terraform apply -auto-approve -var-file="../{{.ENVIRONMENT}}.tfvars" -var="public_key=../ssh_key.pub" -var="upgrade_infrastructure=true"
 
   terraform:down:
     desc: "Destroy all infrastructure"
     cmds:
-      - cmd: terraform -chdir=terraform destroy -auto-approve -var-file="../production.tfvars" -var="public_key=../ssh_key.pub"
+      - cmd: terraform -chdir=terraform destroy -auto-approve -var-file="../{{.ENVIRONMENT}}.tfvars" -var="public_key=../ssh_key.pub"
         ignore_errors: true
       - rm ssh_key ssh_key.pub
 

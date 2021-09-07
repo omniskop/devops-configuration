@@ -44,6 +44,7 @@ Terraform can pass variables to ansible through the generated inventory and vari
 |                          |   public_url   | public_url                   |
 |                          |    api_url     | api_url                      |
 |                          | nodejs_version | nodejs_version               |
+|                          |  environment   | deploy_env                   |
 |                          | database_port  | app_database_port            |
 |                          |  server_port   | app_server_port              |
 |                          |  client_port   | app_client_port              |

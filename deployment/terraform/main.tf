@@ -47,7 +47,7 @@ resource "local_file" "ansible_variables" {
     "nodejs_version": var.nodejs_version
     "public_url": var.public_url
     "api_url": var.api_url
-    "branch_name": var.branch_name
+    "environment": var.environment
 
     "app_database_ip_address": aws_instance.app_database.public_ip
     "app_database_vpc_ip_address": aws_instance.app_database.private_ip
