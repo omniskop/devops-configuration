@@ -16,7 +16,7 @@ This repository contains files and deployment configuration for my DevOps course
 
 ## Concept
 
-Read the [concept](Concept.md) for an overview of the architecture.
+The original concept can be read [here](Concept.md) but it it not up to date.
 
 ## Deployment
 
