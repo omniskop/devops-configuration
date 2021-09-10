@@ -31,16 +31,22 @@
     file:
       path: /opt/mongo/db
       state: directory
-  - name: "install systemd service"
+  - name: "install mongod service"
     template:
       src: mongod.service
       dest: /etc/systemd/system/mongod.service
-  - name: "start systemd service"
+  - name: "start mongod service"
     service:
       name: mongod
       daemon_reload: yes
       enabled: true
       state: started
+
+  - name: "install promtail"
+    vars:
+      promtail_service: "app-database"
+    include: tasks/promtail.yml
+    become: yes
 
   # handlers:
   #   - name: restart mongodb

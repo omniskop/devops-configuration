@@ -1,0 +1,31 @@
+  - name: "install promtail"
+    get_url:
+      url: "https://github.com/grafana/loki/releases/download/v2.3.0/promtail-linux-amd64.zip"
+      dest: "/opt/promtail.zip"
+  - name: "install unzip"
+    apt:
+      name: "unzip"
+      state: latest
+  - name: "unzip promtail"
+    unarchive:
+      remote_src: yes
+      src: "/opt/promtail.zip"
+      dest: /usr/bin/
+      creates: /usr/bin/promtail
+  - name: "copy promtail config"
+    vars:
+      promtail_loki_password: "{{ lookup('env', 'PROMTAIL_LOKI_PASSWORD') }}"
+    template:
+      src: promtail.config.yml
+      dest: /opt/promtail.config.yml
+  - name: "install promtail service"
+    template:
+      src: promtail.service
+      dest: /etc/systemd/system/promtail.service
+  - name: "start promtail"
+    service:
+      name: promtail
+      daemon_reload: yes
+      enabled: true
+      state: restarted
+

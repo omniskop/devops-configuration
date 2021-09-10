@@ -1,0 +1,59 @@
+server:
+  disable: true
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: https://omniskop.de/devops/loki/loki/api/v1/push
+    basic_auth:
+      username: promtail
+      password: {{ promtail_loki_password }}
+    external_labels:
+      instance: {{ ansible_host }}
+      service: {{ promtail_service }}
+      environment: {{ deploy_env }}
+
+scrape_configs:
+  - job_name: system
+    static_configs:
+      - labels:
+          __path__: /var/log/*log
+{% if promtail_service == "app-database" %}
+  - job_name: database
+    static_configs:
+      - labels:
+          __path__: /opt/mongo/logs/mongodb.log
+{% endif %}
+{% if promtail_service == "app-server" %}
+  - job_name: app-server
+    static_configs:
+      - labels:
+          category: error
+          __path__: /home/ubuntu/error.log
+      - labels:
+          category: output
+          __path__: /home/ubuntu/output.log
+{% endif %}
+{% if promtail_service == "app-client" %}
+  - job_name: app-client
+    static_configs:
+      - labels:
+          category: error
+          __path__: /var/log/nginx/error.log
+      - labels:
+          category: output
+          __path__: /var/log/nginx/access.log
+{% endif %}
+{% if promtail_service == "balancer-server" %}
+  - job_name: balancer-server
+    static_configs:
+      - labels:
+          category: error
+          __path__: /var/log/nginx/error.log
+      - labels:
+          category: output
+          __path__: /var/log/nginx/access.log
+{% endif %}

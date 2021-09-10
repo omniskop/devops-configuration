@@ -1,3 +1,5 @@
+.env
+
 # generated
 tf_inventory.yml
 tf_variables.yml

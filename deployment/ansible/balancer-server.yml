@@ -4,6 +4,7 @@
     dns_control_key: "{{ lookup('env', 'DNS_CONTROL_KEY') }}"
   become: yes
   tasks:
+  # miscellaneous
   - name: "include variables"
     include_vars:
       file: ../tf_variables.yml
@@ -11,11 +12,12 @@
     apt:
       update_cache: yes
       cache_valid_time: 3600
-  - name: "install nginx"
+  - name: "install nginx and passlib"
     apt:
-      name: ['nginx']
+      name: ['nginx', 'python3-passlib']
       state: latest
 
+  # setup ssl
   - name: "download fullchain"
     uri:
       url: "https://omniskop.de/node-red/devops/cert/fullchain.pem"
@@ -40,12 +42,21 @@
     get_url:
       url: "https://ssl-config.mozilla.org/ffdhe2048.txt"
       dest: "/etc/nginx/dhparam"
-      
+  
+  # copy configurations
+  - name: "configure prometheus auth"
+    community.general.htpasswd:
+      path: "/etc/nginx/prometheus_auth"
+      name: "prometheus"
+      password: "{{ lookup('env', 'PROMETHEUS_PASSWORD') }}"
+      owner: root
+      group: www-data
+      mode: 0640
   - name: "copy server balancer config"
     template:
       src: balancer-server.nginx.conf
       dest: /etc/nginx/sites-available/balancer-server.conf
-  - name: "enable config"
+  - name: "enable server balancer config"
     file:
       src: "/etc/nginx/sites-available/balancer-server.conf"
       dest: "/etc/nginx/sites-enabled/balancer-server.conf"
@@ -58,6 +69,8 @@
     file:
       path: /etc/nginx/sites-enabled/default
       state: absent
+
+  # start server
   - name: "start nginx"
     service:
       name: nginx
@@ -73,3 +86,42 @@
       body_format: json
       follow_redirects: all
       headers: {"Content-Type": "application/json"}
+
+  - name: "install prometheus"
+    get_url:
+      url: "https://github.com/prometheus/prometheus/releases/download/v2.29.2/prometheus-2.29.2.linux-amd64.tar.gz"
+      dest: /opt/prometheus.tar.gz
+  - name: "extract prometheus"
+    unarchive:
+      src: /opt/prometheus.tar.gz
+      dest: /opt
+      remote_src: yes
+  - name: "copy prometheus executable"
+    copy:
+      src: /opt/prometheus-2.29.2.linux-amd64/prometheus
+      dest: /usr/bin/prometheus
+      remote_src: yes
+      mode: u=rwx,g=rx,o=rx
+  - name: "copy prometheus config"
+    template:
+      src: prometheus-accumulator.yml
+      dest: /opt/prometheus-accumulator.yml
+  - name: "install prometheus service"
+    template:
+      src: prometheus.service
+      dest: /etc/systemd/system/prometheus.service
+  - name: "start prometheus service"
+    service:
+      name: prometheus
+      daemon_reload: yes
+      enabled: true
+      state: started
+
+  - name: "install promtail"
+    vars:
+      promtail_service: "balancer-server"
+    include: tasks/promtail.yml
+    become: yes
+
+  - name: "install nginx prometheus exporter"
+    include: tasks/nginx-exporter.yml

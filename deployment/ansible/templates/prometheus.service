@@ -1,0 +1,13 @@
+[Unit]
+Description=Prometheus Accumulator
+Wants=network.target
+After=network.target
+
+[Service]
+Type=simple
+PermissionsStartOnly=true
+ExecStart=/usr/bin/prometheus --config.file=/opt/prometheus-accumulator.yml
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

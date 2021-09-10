@@ -5,10 +5,16 @@
   - name: "include variables"
     include_vars:
       file: ../tf_variables.yml
-  - name: "clone repository"
-    include: clone.yml
   - name: "install NodeJS"
-    include: nodejs.yml
+    include: tasks/nodejs.yml
+  - name: "clone repository"
+    include: tasks/clone.yml
+  - name: "install dependencies"
+    community.general.npm:
+      ci: true
+      production: true
+      path: "/home/{{ ansible_user_id }}/deployment/app/server"
+
   - name: "install pm2"
     command:
       cmd: "npm install -g pm2"
@@ -19,20 +25,23 @@
       cmd: "pm2 startup systemd -u {{ ansible_user_id }} --hp /home/{{ ansible_user_id }}"
       creates: /etc/systemd/system/pm2*.service
     become: yes
+  - name: "install pm2-metrics"
+    command:
+      cmd: "pm2 install pm2-metrics"
 
   - name: "copy pm2 ecosystem"
     template:
       src: server-ecosystem.js
       dest: /home/{{ ansible_user_id }}/ecosystem.config.js
-
-  - name: "install dependencies"
-    community.general.npm:
-      ci: true
-      production: true
-      path: "/home/{{ ansible_user_id }}/deployment/app/server"
   - name: "run"
     command:
       chdir: "/home/{{ ansible_user_id }}"
       cmd: "/usr/bin/pm2 start ecosystem.config.js"
-  - name: "save pm2"
+  - name: "save pm2" # save for autostart
     command: "pm2 save"
+
+  - name: "install promtail"
+    vars:
+      promtail_service: "app-server"
+    include: tasks/promtail.yml
+    become: yes

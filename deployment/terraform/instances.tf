@@ -10,7 +10,6 @@ resource "aws_instance" "app_database" {
 
   vpc_security_group_ids = [
     aws_security_group.default-public-inbound.id,
-    aws_security_group.default-vpc-inbound.id,
     aws_security_group.vpc-mongo-inbound.id,
     aws_security_group.allow-all-outbound.id
   ]
@@ -30,7 +29,7 @@ resource "aws_instance" "app_server" {
   vpc_security_group_ids = [
     aws_security_group.default-public-inbound.id,
     aws_security_group.vpc-server-inbound.id,
-    aws_security_group.default-vpc-inbound.id,
+    aws_security_group.vpc-metrics-inbound.id,
     aws_security_group.allow-all-outbound.id
   ]
 }
@@ -49,7 +48,7 @@ resource "aws_instance" "app_server_outdated" {
   vpc_security_group_ids = [
     aws_security_group.default-public-inbound.id,
     aws_security_group.vpc-server-inbound.id,
-    aws_security_group.default-vpc-inbound.id,
+    aws_security_group.vpc-metrics-inbound.id,
     aws_security_group.allow-all-outbound.id
   ]
 }
@@ -66,8 +65,8 @@ resource "aws_instance" "app_client" {
 
   vpc_security_group_ids = [
     aws_security_group.default-public-inbound.id,
-    aws_security_group.default-vpc-inbound.id,
     aws_security_group.vpc-client-inbound.id,
+    aws_security_group.vpc-metrics-inbound.id,
     aws_security_group.allow-all-outbound.id
   ]
 }
@@ -84,8 +83,8 @@ resource "aws_instance" "app_client_outdated" {
 
   vpc_security_group_ids = [
     aws_security_group.default-public-inbound.id,
-    aws_security_group.default-vpc-inbound.id,
     aws_security_group.vpc-client-inbound.id,
+    aws_security_group.vpc-metrics-inbound.id,
     aws_security_group.allow-all-outbound.id
   ]
 }
@@ -102,6 +101,7 @@ resource "aws_instance" "balancer_server" {
   vpc_security_group_ids = [
     aws_security_group.default-public-inbound.id,
     aws_security_group.http-inbound.id,
+    aws_security_group.public-metrics-inbound.id,
     aws_security_group.allow-all-outbound.id
   ]
 }

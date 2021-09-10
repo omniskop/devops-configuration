@@ -12,6 +12,7 @@ env:
   TF_HTTP_ADDRESS: https://omniskop.de/node-red/devops/terraform/state/{{.ENVIRONMENT}}
   TF_HTTP_LOCK_ADDRESS: https://omniskop.de/node-red/devops/terraform/state/{{.ENVIRONMENT}}/lock
   TF_HTTP_UNLOCK_ADDRESS: https://omniskop.de/node-red/devops/terraform/state/{{.ENVIRONMENT}}/unlock
+  ANSIBLE_PIPELINING: 1
 
 tasks:
   aws:status:

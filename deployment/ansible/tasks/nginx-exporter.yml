@@ -1,0 +1,25 @@
+- name: "install nginx prometheus exporter"
+  get_url:
+    url: "https://github.com/nginxinc/nginx-prometheus-exporter/releases/download/v0.9.0/nginx-prometheus-exporter_0.9.0_linux_amd64.tar.gz"
+    dest: /opt/nginx-prometheus-exporter.tar.gz
+- name: "extract nginx prometheus exporter"
+  unarchive:
+    src: /opt/nginx-prometheus-exporter.tar.gz
+    dest: /opt
+    remote_src: yes
+- name: "copy nginx prometheus exporter executable"
+  copy:
+    src: /opt/nginx-prometheus-exporter
+    dest: /usr/bin/nginx-prometheus-exporter
+    remote_src: yes
+    mode: u=rwx,g=rx,o=rx
+- name: "install nginx prometheus exporter service"
+  template:
+    src: nginx-exporter.service
+    dest: /etc/systemd/system/nginx-exporter.service
+- name: "start nginx prometheus exporter"
+  service:
+    name: nginx-exporter
+    daemon_reload: yes
+    enabled: true
+    state: started

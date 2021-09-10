@@ -1,0 +1,27 @@
+
+scrape_configs:
+  - job_name: "app-server"
+    static_configs:
+      - labels:
+          service: "app-server"
+          environment: {{deploy_env}}
+        targets:
+{% for addr in app_server_vpc_ip_addresses %}
+        - "{{addr}}:9209"
+{% endfor %}
+  - job_name: "app-client"
+    static_configs:
+      - labels:
+          service: "app-client"
+          environment: {{deploy_env}}
+        targets:
+{% for addr in app_client_vpc_ip_addresses %}
+        - "{{addr}}:9113"
+{% endfor %}
+  - job_name: "balancer-server"
+    static_configs:
+      - labels:
+          service: "app-server"
+          environment: {{deploy_env}}
+        targets:
+        - 127.0.0.1:9113

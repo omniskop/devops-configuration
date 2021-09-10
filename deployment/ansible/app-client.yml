@@ -4,9 +4,9 @@
     include_vars:
       file: ../tf_variables.yml
   - name: "clone repository"
-    include: clone.yml
+    include: tasks/clone.yml
   - name: "install NodeJS"
-    include: nodejs.yml
+    include: tasks/nodejs.yml
 
   - name: "apt-get update"
     apt:
@@ -42,4 +42,14 @@
     service:
       name: nginx
       state: restarted
+    become: yes
+
+  - name: "install promtail"
+    vars:
+      promtail_service: "app-client"
+    include: tasks/promtail.yml
+    become: yes
+
+  - name: "install nginx prometheus exporter"
+    include: tasks/nginx-exporter.yml
     become: yes
