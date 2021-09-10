@@ -21,7 +21,7 @@ scrape_configs:
   - job_name: "balancer-server"
     static_configs:
       - labels:
-          service: "app-server"
+          service: "balancer-server"
           environment: {{deploy_env}}
         targets:
         - 127.0.0.1:9113
