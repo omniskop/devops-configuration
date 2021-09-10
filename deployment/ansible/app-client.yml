@@ -41,7 +41,11 @@
   - name: "start nginx"
     service:
       name: nginx
-      state: restarted
+      state: started
+    become: yes
+  - name: "reload nginx config"
+    command:
+      cmd: "nginx -s reload"
     become: yes
 
   - name: "install promtail"
