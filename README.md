@@ -8,6 +8,7 @@ This repository contains files and deployment configuration for my DevOps course
     - [Prerequisites](#prerequisites)
     - [Usage](#usage)
     - [Variables](#variables)
+    - [The Process](#the-process)
   - [Monitoring](#monitoring)
     - [Balancer](#balancer)
     - [Database](#database)
@@ -88,9 +89,41 @@ Terraform can pass variables to ansible through the generated inventory and vari
 |                          |                |                              |
 |                          |                |                              |
 
+### The Process
+
+The following describes a full deployment executed through GitHub Actions:
+
+ - Requirements are being installed
+ - Private and public key are copied from a secret to a local file that can be accessed by terraform and ansible.
+ - AWS credentials are fetched through a POST request from an external server. The access is authorized by the `AWS_CREDENTIALS_KEY` secret.
+ - Terraform will be initialized.
+ - The Terraform state is modified and moves existing server and client instances to an "outdated" state.  
+   The states for staging and production are stored is a custom http backend that is hosted on an external server and is authenticated using the `TF_HTTP_PASSWORD` secret.
+ - Terraform is run and it will create new server and client instances while keeping the old ones.  
+   Terraform generates two files for ansible: An inventory file and a file containing variables with various additional information that ansible will need.
+ - A small delay has been added here because GitHub Actions sometimes executed ansible to quickly after terraform when instances weren't available yet.
+ - Ansible will now provision the new instances and updates the load balancer to the new internal ip addresses.  
+   It can setup four different types of instances:
+   - Database
+     - A simple mongodb installation
+   - Server
+     - Clones the correct branch of the app and runs it using [pm2](https://pm2.keymetrics.io)
+   - Client
+     - Clones the correct branch of the app, builds the client and hosts it using nginx.
+   - Balancer
+     - Contains a prometheus server that bundles all metrics from the other instances.
+     - Runs nginx as a load balancer for server and client.
+     - Also a reverse proxy for prometheus, adding ssl encryption and authentication.
+     - The ssl certificate is downloaded from an external server using the key in the `CERTIFICATE_ACCESS_TOKEN` secret. The certificate is internally provided by letsencrypt and valid for todo.omniskop.de and *.todo.omniskop.de.
+     - The dns entry for the correct domain is updated through an external server using the key in the `DNS_CONTROL_KEY` secret. The server then updates the dns settings of a personal INWX account.
+ - Terraform is executed again to now destroy the outdated instances.
+
+This diagram shows the major components of the deployed application and their interaction.
+![aasd](infrastructure_diagram.png)
+
 ## Monitoring
 
-All monitoring is available through a separately installed grafana instance. The instances are using different means to report their different metrics.
+All monitoring is available through an externally installed grafana instance. The instances are using different means to report their different metrics.
 The instances all share reporting of /var/log/syslog and /var/log/auth.log files.
 
 ### Balancer
@@ -101,8 +134,8 @@ Metrics for production are available at `todo.omniskop.de:9091` and for staging 
 
 ### Database
 
-Mongodb logs are collected using promtail and proactively sent to loki running on a central server next to grafana.
-Basic Auth is used for authentication with username "loki" and the password specified in PROMTAIL_LOKI_PASSWORD.
+Mongodb logs are collected using promtail and proactively sent to loki running on an external server next to grafana.
+Basic Auth is used for authentication with username "loki" and the password specified in `PROMTAIL_LOKI_PASSWORD`.
 
 ### Server
 
